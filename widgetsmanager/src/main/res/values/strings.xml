@@ -1,0 +1,19 @@
+<resources>
+	
+	<string name="title_widget_settings">Настройка виджета</string>
+	<string name="dialog_title_plugins">Выберите плагин</string>
+	<string name="settings_widget_plugin">Плагин</string>
+	<string name="settings_widget_bg_color">Цвет фона</string>
+	<string name="mess_plugins_empty">Плагины не найдены</string>
+	<string name="list_empty">Пусто</string>
+	<string name="settings_widget_update">Время обновления виджета</string>
+	<string name="settings_widget_update_descr">Время обновления виджета (в минутах)</string>
+	<string name="settings_transparency">Прозрачность</string>
+	<string name="settings_corners_radius">Скругление углов</string>
+	<string name="settings_font_size">Размер шрифта</string>
+	<string name="settings_font_color">Цвет шрифта</string>
+	<string name="settings_font_italic">Курсивный шрифт</string>
+	<string name="settings_font_serif">Шрифт с засечками</string>
+	<string name="settings_hide_date">Скрыть дату на виджете</string>
+	
+</resources>
