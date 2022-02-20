@@ -1,4 +1,4 @@
-	package pro.acuna.widgetsmanager;
+	package ru.ointeractive.widgetsmanager;
 	/*
 	 Created by Acuna on 10.07.2018
 	*/
@@ -13,9 +13,9 @@
 	
 	import java.util.List;
 	
-	import pro.acuna.andromeda.Strings;
-	import pro.acuna.andromeda.System;
-	import pro.acuna.jabadaba.Int;
+	import ru.ointeractive.andromeda.Strings;
+	import ru.ointeractive.andromeda.System;
+	import upl.core.Int;
 	
 	public class ListProvider implements RemoteViewsService.RemoteViewsFactory {
 		
@@ -23,7 +23,7 @@
 			
 			public String date = "", title = "", author = "", text = "";
       public Bitmap image;
-			
+      
 		}
 		
 		private WidgetsManager manager;
@@ -68,13 +68,11 @@
 				if (item.image != null && layouts.image > 0)
 					remoteView.setImageViewBitmap (layouts.image, item.image);
 				
-				remoteView.setOnClickFillInIntent (layouts.text, intent);
-				
 				SpannableString text;
 				
 				//remoteView.setInt (item.layouts[5], "setBackgroundResource", manager.prefs.getColor (WidgetsManager.PREF_LIST_DATE_COLOR));
 				
-				if (Int.size (item.date) > 0 && !manager.prefs.getBool (Const.PREF_LIST_HIDE_DATE)) {
+				if (!manager.prefs.getBool (Const.PREF_LIST_HIDE_DATE) && Int.size (item.date) > 0) {
 					
 					remoteView.setViewVisibility (R.id.date, View.VISIBLE);
 					
@@ -88,11 +86,11 @@
 					
 					remoteView.setTextViewText (R.id.date, text);
 					
-				} else {
-					remoteView.setViewVisibility (R.id.date, View.GONE);
-				}
+				} else remoteView.setViewVisibility (R.id.date, View.GONE);
 				
 				if (Int.size (item.title) > 0) {
+					
+					remoteView.setOnClickFillInIntent (layouts.title, intent);
 					
 					remoteView.setFloat (layouts.title, "setTextSize", manager.prefs.getInt (Const.PREF_LIST_TITLE_SIZE));
 					remoteView.setInt (layouts.title, "setTextColor", manager.prefs.getColor (Const.PREF_LIST_TITLE_COLOR));
@@ -120,7 +118,9 @@
 					
 				}
 				
-				if (Int.size (item.text) > 0) {
+				if (!manager.prefs.getBool (Const.PREF_LIST_HIDE_COMMENT) && Int.size (item.text) > 0) {
+					
+					remoteView.setOnClickFillInIntent (layouts.text, intent);
 					
 					remoteView.setFloat (layouts.text, "setTextSize", manager.prefs.getInt (Const.PREF_LIST_TEXT_SIZE));
 					remoteView.setInt (layouts.text, "setTextColor", manager.prefs.getColor (Const.PREF_LIST_TEXT_COLOR));
@@ -132,7 +132,7 @@
 					
 					remoteView.setTextViewText (layouts.text, text);
 					
-				}
+				} else remoteView.setViewVisibility (R.id.text, View.GONE);
 				
 			} catch (WidgetsManagerException e) {
 				remoteView.setTextViewText (layouts.text, System.error (manager.context, e, manager.widgetId));

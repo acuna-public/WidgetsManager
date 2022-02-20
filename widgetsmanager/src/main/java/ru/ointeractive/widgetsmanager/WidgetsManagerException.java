@@ -1,4 +1,4 @@
-	package pro.acuna.widgetsmanager;
+	package ru.ointeractive.widgetsmanager;
 	/*
 	 Created by Acuna on 11.07.2018
 	*/

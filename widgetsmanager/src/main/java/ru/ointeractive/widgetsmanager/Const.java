@@ -1,4 +1,4 @@
-	package pro.acuna.widgetsmanager;
+	package ru.ointeractive.widgetsmanager;
 	/*
 	 Created by Acuna on 04.08.2018
 	*/
@@ -14,7 +14,7 @@
 		public static final String PREF_CORNER_RADIUS = "radius";
 		public static final String PREF_PREV_CORNER_RADIUS = "prev_radius";
 		public static final String PREF_PLUGIN = "provider";
-		public static final String PREF_UPDATE_TIME = "update_time";
+		//public static final String PREF_UPDATE_TIME = "update_time";
 		public static final String PREF_THEME = "theme";
 		public static final String PREF_LIST_THEME = "list_theme";
 		public static final String PREF_TITLE_TEXT = "title_text";
@@ -41,5 +41,6 @@
 		public static final String PREF_LIST_HIDE_DATE = "list_hide_date";
 		public static final String ITEM_TITLE = "title";
 		public static final String THEME_DEFAULT = "Default";
+		public static final String PREF_LIST_HIDE_COMMENT = "list_hide_comment";
 		
 	}

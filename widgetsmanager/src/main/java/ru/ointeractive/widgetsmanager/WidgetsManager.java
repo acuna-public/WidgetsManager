@@ -1,4 +1,4 @@
-  package pro.acuna.widgetsmanager;
+  package ru.ointeractive.widgetsmanager;
   /*
    Created by Acuna on 11.07.2018
   */
@@ -17,44 +17,47 @@
   import android.os.Bundle;
   import android.text.SpannableString;
   import android.view.View;
-  import android.widget.EditText;
   import android.widget.RemoteViews;
-  import android.widget.TextView;
   
   import java.util.ArrayList;
   import java.util.HashMap;
   import java.util.LinkedHashMap;
   import java.util.List;
   import java.util.Map;
-  
-  import pro.acuna.androdesign.UI;
-  import pro.acuna.androdesign.adapter.ItemsAdapter;
-  import pro.acuna.androdesign.widget.ListItem;
-  import pro.acuna.andromeda.AppsManager;
-  import pro.acuna.andromeda.Color;
-  import pro.acuna.andromeda.OS;
-  import pro.acuna.andromeda.Prefs;
-  import pro.acuna.andromeda.Strings;
-  import pro.acuna.andromeda.System;
-  import pro.acuna.jabadaba.Int;
-  import pro.acuna.jabadaba.Locales;
-  
+  import java.util.Random;
+
+  import ru.ointeractive.androdesign.UI;
+  import ru.ointeractive.androdesign.adapter.ItemsAdapter;
+  import ru.ointeractive.androdesign.widget.ListItem;
+  import ru.ointeractive.andromeda.AlarmManager;
+  import ru.ointeractive.andromeda.graphic.Color;
+  import ru.ointeractive.andromeda.OS;
+  import ru.ointeractive.andromeda.Prefs;
+  import ru.ointeractive.andromeda.Strings;
+  import ru.ointeractive.andromeda.System;
+  import upl.core.Int;
+  import upl.core.Locales;
+
   public class WidgetsManager {
     
     public Context context;
     public Prefs prefs;
-    int widgetId;
+    int widgetId = 0;
     private int dialogStyle = 0;
-    private List<Provider> providers = new ArrayList<> ();
-    Provider provider;
+    private List<Adapter> providers = new ArrayList<> ();
+    Adapter provider;
     private Class<?> widgetProvider;
+    private AppWidgetManager manager;
     private Map<String, Object> providerItems = new HashMap<> ();
     
     public WidgetsManager (Context context) {
+    	
       this.context = context;
+	    manager = AppWidgetManager.getInstance (context);
+	    
     }
     
-    private Map<String, Object> defPrefs = new HashMap<> (), prefItems = new HashMap<> ();
+    private Map<String, Object> prefItems = new HashMap<> ();
     
     public WidgetsManager loadPrefs (int id) throws WidgetsManagerException {
       return loadPrefs (id, "");
@@ -63,12 +66,12 @@
     public WidgetsManager loadPrefs (int id, String name) throws WidgetsManagerException {
       
       widgetId = id;
+	    
+	    prefs = new Prefs (context, "widget-" + widgetId);
       
-      defPrefs.put (Const.PREF_PLUGIN, "");
-      defPrefs.put (Const.PREF_THEME, "Default");
-      defPrefs.put (Const.PREF_LIST_THEME, "Default");
-      
-      prefs = new Prefs (context, "widget-" + widgetId, defPrefs);
+      prefs.setDefPref (Const.PREF_PLUGIN, "");
+      prefs.setDefPref (Const.PREF_THEME, "Default");
+      prefs.setDefPref (Const.PREF_LIST_THEME, "Default");
       
       provider = getProvider (!name.equals ("") ? name : prefs.getString (Const.PREF_PLUGIN));
       
@@ -90,7 +93,7 @@
       
     }
     
-    private Map<String, Object> getProviderItems (Provider provider) throws WidgetsManagerException {
+    private Map<String, Object> getProviderItems (Adapter provider) throws WidgetsManagerException {
       return provider.setProviderItems (providerItems);
     }
     
@@ -103,62 +106,61 @@
     
     private AppWidgetProviderInfo widgetInfo;
     
-    private Provider getProvider (String name) throws WidgetsManagerException {
+    private Adapter getProvider (String name) throws WidgetsManagerException {
       
-      widgetInfo = appWidgetManager ().getAppWidgetInfo (widgetId);
+      widgetInfo = manager.getAppWidgetInfo (widgetId);
       
-      defPrefs.put (Const.PREF_BACKGROUND_COLOR, "#000000");
-      defPrefs.put (Const.PREF_TRANSPARENCY, 100);
-      defPrefs.put (Const.PREF_ROUND_CORNERS, true);
-      defPrefs.put (Const.PREF_CORNER_RADIUS, 10);
-      defPrefs.put (Const.PREF_PREV_CORNER_RADIUS, defPrefs.get (Const.PREF_CORNER_RADIUS));
-      defPrefs.put (Const.PREF_UPDATE_TIME, 86400); // Секунд
+      prefs.setDefPref (Const.PREF_BACKGROUND_COLOR, "#000000");
+      prefs.setDefPref (Const.PREF_TRANSPARENCY, 100);
+      prefs.setDefPref (Const.PREF_ROUND_CORNERS, true);
+      prefs.setDefPref (Const.PREF_CORNER_RADIUS, 10);
+      prefs.setDefPref (Const.PREF_PREV_CORNER_RADIUS, prefs.defPrefs.get (Const.PREF_CORNER_RADIUS));
+      //prefs.setDefPref (Const.PREF_UPDATE_TIME, 86400); // Секунд
       
-      defPrefs.put (Const.PREF_TITLE_TEXT, "");
+      prefs.setDefPref (Const.PREF_TITLE_TEXT, "");
       
-      defPrefs.put (Const.PREF_TITLE_SIZE, 15);
-      defPrefs.put (Const.PREF_TITLE_COLOR, "#ffffff");
-      defPrefs.put (Const.PREF_TITLE_STYLE, Typeface.NORMAL);
-      defPrefs.put (Const.PREF_TITLE_FONT_FAMILY, "");
+      prefs.setDefPref (Const.PREF_TITLE_SIZE, 16);
+      prefs.setDefPref (Const.PREF_TITLE_COLOR, "#ffffff");
+      prefs.setDefPref (Const.PREF_TITLE_STYLE, Typeface.NORMAL);
+      prefs.setDefPref (Const.PREF_TITLE_FONT_FAMILY, "");
       
-      defPrefs.put (Const.PREF_LIST_HIDE_DATE, false);
+      prefs.setDefPref (Const.PREF_LIST_HIDE_DATE, false);
       
-      defPrefs.put (Const.PREF_LIST_DATE_SIZE, 14);
-      defPrefs.put (Const.PREF_LIST_DATE_COLOR, "#ffffff");
-      defPrefs.put (Const.PREF_LIST_DATE_STYLE, Typeface.BOLD);
-      defPrefs.put (Const.PREF_LIST_DATE_FONT_FAMILY, "");
+      prefs.setDefPref (Const.PREF_LIST_DATE_SIZE, 15);
+      prefs.setDefPref (Const.PREF_LIST_DATE_COLOR, "#ffffff");
+      prefs.setDefPref (Const.PREF_LIST_DATE_STYLE, Typeface.BOLD);
+      prefs.setDefPref (Const.PREF_LIST_DATE_FONT_FAMILY, "");
       
-      defPrefs.put (Const.PREF_LIST_TITLE_SIZE, 15);
-      defPrefs.put (Const.PREF_LIST_TITLE_COLOR, "#ffffff");
-      defPrefs.put (Const.PREF_LIST_TITLE_STYLE, Typeface.NORMAL);
-      defPrefs.put (Const.PREF_LIST_TITLE_FONT_FAMILY, "");
+      prefs.setDefPref (Const.PREF_LIST_TITLE_SIZE, 18);
+      prefs.setDefPref (Const.PREF_LIST_TITLE_COLOR, "#ffffff");
+      prefs.setDefPref (Const.PREF_LIST_TITLE_STYLE, Typeface.NORMAL);
+      prefs.setDefPref (Const.PREF_LIST_TITLE_FONT_FAMILY, "");
       
-      defPrefs.put (Const.PREF_LIST_AUTHOR_SIZE, 13);
-      defPrefs.put (Const.PREF_LIST_AUTHOR_COLOR, "#ffffff");
-      defPrefs.put (Const.PREF_LIST_AUTHOR_STYLE, Typeface.NORMAL);
-      defPrefs.put (Const.PREF_LIST_AUTHOR_FONT_FAMILY, "");
+      prefs.setDefPref (Const.PREF_LIST_AUTHOR_SIZE, 14);
+      prefs.setDefPref (Const.PREF_LIST_AUTHOR_COLOR, "#ffffff");
+      prefs.setDefPref (Const.PREF_LIST_AUTHOR_STYLE, Typeface.NORMAL);
+      prefs.setDefPref (Const.PREF_LIST_AUTHOR_FONT_FAMILY, "");
       
-      defPrefs.put (Const.PREF_LIST_TEXT_SIZE, 14);
-      defPrefs.put (Const.PREF_LIST_TEXT_COLOR, "#ffffff");
-      defPrefs.put (Const.PREF_LIST_TEXT_STYLE, Typeface.NORMAL);
-      defPrefs.put (Const.PREF_LIST_TEXT_FONT_FAMILY, "");
+      prefs.setDefPref (Const.PREF_LIST_TEXT_SIZE, 17);
+      prefs.setDefPref (Const.PREF_LIST_TEXT_COLOR, "#ffffff");
+      prefs.setDefPref (Const.PREF_LIST_TEXT_STYLE, Typeface.NORMAL);
+      prefs.setDefPref (Const.PREF_LIST_TEXT_FONT_FAMILY, "");
       
-      for (Provider provider : providers) {
+      for (Adapter provider : providers) {
         
-        defPrefs = provider.setDefPrefs (defPrefs);
+        provider = provider.getInstance (this);
+        prefs.defPrefs = provider.getDefPrefs (prefs.defPrefs);
         
-        if (defPrefs.get (Const.PREF_PLUGIN).equals (name)) {
+        if (prefs.defPrefs.get (Const.PREF_PLUGIN).equals (name)) {
           
-          defPrefs.put (Const.PREF_ACTION, "build");
+          prefs.setDefPref (Const.PREF_ACTION, "build");
           
           if (widgetInfo != null) {
             
-            defPrefs.put (Const.PREF_WIDTH, (widgetInfo.minWidth * getWidthColsNum ()));
-            defPrefs.put (Const.PREF_HEIGHT, (widgetInfo.minHeight * getHeightColsNum ()));
+            prefs.setDefPref (Const.PREF_WIDTH, (widgetInfo.minWidth * getWidthColsNum ()));
+            prefs.setDefPref (Const.PREF_HEIGHT, (widgetInfo.minHeight * getHeightColsNum ()));
             
           }
-          
-          prefs = prefs.setDefPrefs (provider.setDefPrefs (defPrefs));
           
           return provider;
           
@@ -170,7 +172,7 @@
       
     }
     
-    public WidgetsManager addProvider (Provider provider) {
+    public WidgetsManager addProvider (Adapter provider) {
       
       providers.add (provider);
       return this;
@@ -190,22 +192,23 @@
       
     }
     
-    private void updateWidget (RemoteViews remoteView, AppWidgetManager manager) {
+    private void updateWidget (RemoteViews remoteView) {
       
       Layouts item = provider.getLayouts ();
       
       Intent intent = new Intent (context, service);
       
       intent.putExtra (AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
-      intent.setData (Uri.parse (intent.toUri (Intent.URI_INTENT_SCHEME)));
-      
+      //intent.setData (Uri.parse (intent.toUri (Intent.URI_INTENT_SCHEME)));
+	    intent.setType (String.valueOf (new Random ().nextInt (1000)));
+	    
       remoteView.setRemoteAdapter (item.listView, intent);
       
       manager.notifyAppWidgetViewDataChanged (widgetId, item.listView);
       
     }
     
-    private RemoteViews buildWidget (RemoteViews remoteView, AppWidgetManager manager) {
+    public RemoteViews buildWidget (RemoteViews remoteView) {
       
       Layouts item = provider.getLayouts ();
       
@@ -213,7 +216,7 @@
         
         SpannableString text = new SpannableString (prefs.getString (Const.PREF_TITLE_TEXT).replace ("%d", Locales.date (1)));
         
-        int edgeDef = 10, edge = edgeDef;
+        int edgeDef = 10;
         //int edge = Int.prop (prefs.getInt (PREF_CORNER_RADIUS), prefs.getInt (PREF_PREV_CORNER_RADIUS), edgeDef);
         //edge = Int.correct (edge, edgeDef, 10);
         
@@ -229,7 +232,7 @@
           
           remoteView.setTextViewText (item.widgetTitle, text);
           
-          remoteView.setViewPadding (item.widgetTitle, edge, 0, edge, 0);
+          remoteView.setViewPadding (item.widgetTitle, edgeDef, 0, edgeDef, 0);
           
         }
         
@@ -239,9 +242,7 @@
         
         remoteView.setPendingIntentTemplate (item.listView, pIntent);
         
-        updateWidget (remoteView, manager);
-        
-        remoteView.setViewPadding (item.listView, edge, 10, edge, 10);
+        remoteView.setViewPadding (item.listView, edgeDef, 10, edgeDef, 10);
         remoteView.setEmptyView (item.listView, item.emptyView);
         
         remoteView.setInt (item.background, "setColorFilter", prefs.getColor (Const.PREF_BACKGROUND_COLOR));
@@ -265,13 +266,15 @@
         
       }
       
-      return remoteView;
-      
+	    updateWidget (remoteView);
+     
+	    return remoteView;
+     
     }
     
     public WidgetsManager setWidgetProvider (Class<?> provider) {
       
-      this.widgetProvider = provider;
+      widgetProvider = provider;
       return this;
       
     }
@@ -319,7 +322,7 @@
       adapter.addListener (new ItemsAdapter.TextListener () {
         
         @Override
-        public void onClick (final View view, ItemsAdapter.ViewHolder holder, ListItem item) {
+        public void onClick (View view, ItemsAdapter.ViewHolder holder, ListItem item) { // Выбор провайдера виджета
           
           try {
             
@@ -331,7 +334,7 @@
             buildWidget (activity);
             activity.finish ();
             
-            provider.onProviderSelect (item.getArgv (2), widgetId);
+            provider.onProviderSelect (view, item.getArgv (2), widgetId);
             
           } catch (WidgetsManagerException e) {
             OS.alert (context, System.error (context, e));
@@ -349,27 +352,27 @@
     }
     
     private Map<String, Object> getDefPrefs () throws WidgetsManagerException {
-      return provider.setDefPrefs (new HashMap<String, Object> ());
+      return provider.getDefPrefs (new HashMap<String, Object> ());
     }
     
-    public void startWidgetUpdate () throws WidgetsManagerException {
-      
-      Intent intent = new Intent (context, widgetProvider);
-      
-      intent.setAction (AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-      
-      Uri.Builder build = new Uri.Builder ();
-      build.appendPath ("" + widgetId);
-      
-      intent.setData (build.build ());
-      
-      intent.putExtra (AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
-      
-      if (provider.setService (intent) == null)
-        new OS.Service (context, Locales.time () + (prefs.getInt (Const.PREF_UPDATE_TIME) * 1000))
-          .setIntent (PendingIntent.getBroadcast (context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT))
-          .init ()
-          .start ((prefs.getInt (Const.PREF_UPDATE_TIME) * 1000));
+    public void startWidgetUpdate () {
+	    
+      if (provider != null) { // Виджет может быть не установлен, но сервис запущен
+	      
+        Intent intent = new Intent (context, widgetProvider);
+        
+        intent.setAction (AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        
+        Uri.Builder build = new Uri.Builder ();
+        build.appendPath ("" + widgetId);
+        
+        intent.setData (build.build ());
+        
+        intent.putExtra (AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId); // TODO widgetId is null
+        
+        provider.setService (intent);
+        
+      }
       
     }
     
@@ -390,28 +393,6 @@
           
         }
         
-        List<ListItem> items = new ArrayList<> ();
-        
-        //items.add (new ListItem ().setArgv (Graphics.toString (this, R.string.settings_widget_provider), dt.widget.providerItems.getString (ITEM_TITLE), PREF_PLUGIN));
-        
-        items.add (new ListItem ().setArgv (context.getString (R.string.settings_widget_bg_color), Color.toString (prefs.getColor (Const.PREF_BACKGROUND_COLOR)), Const.PREF_BACKGROUND_COLOR));
-        
-        items.add (new ListItem ().setArgv (context.getString (R.string.settings_transparency), "", Const.PREF_TRANSPARENCY).setSeekbar (prefs.getInt (Const.PREF_TRANSPARENCY)).setSeekbarMaxValue (255));
-        
-        //items.add (new ListItem ().setArgv (context.getString (R.string.settings_corners_radius), "", Const.PREF_CORNER_RADIUS).setSeekbar (prefs.getInt (Const.PREF_CORNER_RADIUS)));
-        
-        items.add (new ListItem ().setChecked (prefs.getBool (Const.PREF_ROUND_CORNERS)).setArgv (context.getString (R.string.settings_corners_radius), "", Const.PREF_ROUND_CORNERS));
-        
-        //items.add (new ListItem ().setArgv (context.getString (R.string.settings_widget_update), updateDescr (prefs.getInt (Const.PREF_UPDATE_TIME)), Const.PREF_UPDATE_TIME));
-        
-        items.add (new ListItem ().setArgv (context.getString (R.string.settings_font_size), "", Const.PREF_LIST_TEXT_SIZE).setSeekbar (prefs.getInt (Const.PREF_LIST_TEXT_SIZE)).setSeekbarMinValue (10).setSeekbarMaxValue (25));
-        
-        items.add (new ListItem ().setChecked (prefs.getString (Const.PREF_LIST_TEXT_FONT_FAMILY).equals ("serif")).setArgv (context.getString (R.string.settings_font_serif), "", Const.PREF_LIST_TEXT_FONT_FAMILY));
-        
-        items.add (new ListItem ().setArgv (context.getString (R.string.settings_font_color), Color.toString (prefs.getColor (Const.PREF_LIST_TEXT_COLOR)), Const.PREF_LIST_TEXT_COLOR));
-        
-        items.add (new ListItem ().setChecked (prefs.getBool (Const.PREF_LIST_HIDE_DATE)).setArgv (context.getString (R.string.settings_hide_date), "", Const.PREF_LIST_HIDE_DATE));
-        
         ItemsAdapter.Layouts layouts = new ItemsAdapter.Layouts ();
         
         layouts.title = R.id.title;
@@ -419,7 +400,7 @@
         layouts.checkbox = R.id.checkbox;
         layouts.seekbar = R.id.seekbar;
         
-        adapter = provider.setPrefsAdapter (layouts, items);
+        adapter = provider.setPrefsAdapter (layouts, provider.getPrefsItems (new ArrayList<ListItem> ()));
         
         adapter.addListener (new ItemsAdapter.SeekbarItemListener () {
           
@@ -465,12 +446,12 @@
                 
               }
               
-              case Const.PREF_UPDATE_TIME: {
+              /*case Const.PREF_UPDATE_TIME: {
                 
                 UI.dialog ((Activity) context, dialogStyle, R.string.title_input, R.layout.dialog_input_descr, new UI.DialogViewNegInterface () {
                   
                   @Override
-                  public View onView (AlertDialog.Builder builder, View dialogView) {
+                  public View onView (AlertDialog.NumberPicker builder, View dialogView) {
                     
                     TextView text = dialogView.findViewById (R.id.descr);
                     text.setText (R.string.settings_widget_update_descr);
@@ -506,7 +487,7 @@
                 
                 break;
                 
-              }
+              }*/
               
             }
             
@@ -523,7 +504,7 @@
             
             holder.seekbarValue.setText (String.valueOf (progress));
             prefItems.put (item.getArgv (2), progress);
-            
+	          
           }
           
           @Override
@@ -546,7 +527,7 @@
       else if (num == 1)
         output = context.getString (R.string.interval_minute_0);
       else
-        output = pro.acuna.jabadaba.Strings.suffix (num, new String[] {
+        output = new upl.type.String (num).suffix (new String[] {
           
           context.getString (R.string.interval_minute_1),
           context.getString (R.string.interval_minute_2),
@@ -622,21 +603,21 @@
           
         }*/
     
-    public void editWidget (Activity activity) throws WidgetsManagerException {
+    public WidgetsManager editWidget (Activity activity) throws WidgetsManagerException {
       
-      Object oldSize = prefItems.get (Const.PREF_LIST_TEXT_SIZE);
+      /*Object oldSize = prefItems.get (Const.PREF_LIST_TEXT_SIZE);
       if (oldSize == null) oldSize = prefs.getInt (Const.PREF_LIST_TEXT_SIZE);
       
       String[] names = new String[] {Const.PREF_LIST_DATE_SIZE, Const.PREF_LIST_TITLE_SIZE, Const.PREF_LIST_AUTHOR_SIZE};
       
       for (String name : names) {
         
-        if (oldSize.equals (defPrefs.get (Const.PREF_LIST_TEXT_SIZE)))
-          prefItems.put (name, defPrefs.get (name));
+        if (oldSize.equals (prefs.defPrefs.get (Const.PREF_LIST_TEXT_SIZE)))
+          prefItems.put (name, prefs.defPrefs.get (name));
         else
           prefItems.put (name, Int.floor (Int.prop (((Integer) oldSize).doubleValue (), ((Integer) prefs.getInt (Const.PREF_LIST_TEXT_SIZE)).doubleValue (), ((Integer) prefs.getInt (name)).doubleValue ())));
         
-      }
+      }*/
       
       Object isSerif = prefItems.get (Const.PREF_LIST_TEXT_FONT_FAMILY);
       
@@ -656,7 +637,7 @@
       
       saveSettings ();
       
-      AppsManager.close (context);
+      return this;
       
     }
     
@@ -665,25 +646,20 @@
       for (String key : prefItems.keySet ())
         prefs.set (key, prefItems.get (key));
       
-      prefs.editor.apply ();
+      prefs.apply ();
       
     }
     
-    public void updateWidget (AppWidgetManager appWidgetManager, int appWidgetId) throws WidgetsManagerException {
-      
+    public void updateWidget () throws WidgetsManagerException {
+	    
       if (provider != null) {
-        
+	      
         RemoteViews remoteView = new RemoteViews (context.getPackageName (), getTheme ());
         
         Layouts item = provider.getLayouts ();
         
         try {
-          
-          //if (prefs.getString (PREF_ACTION).equals ("build"))
-          appWidgetManager.updateAppWidget (appWidgetId, buildWidget (remoteView, appWidgetManager));
-          //else
-          //	appWidgetManager.updateAppWidget (appWidgetId, buildWidget (remoteView, appWidgetManager));
-          
+	        manager.updateAppWidget (widgetId, buildWidget (remoteView));
         } catch (IllegalArgumentException e) {
           remoteView.setTextViewText (item.widgetTitle, e.getMessage ());
         }
@@ -692,16 +668,16 @@
       
     }
     
-    int getTheme () throws WidgetsManagerException {
+    public int getTheme () throws WidgetsManagerException {
       return provider.setThemes (new LinkedHashMap<String, Integer> ()).get (prefs.getString (Const.PREF_THEME));
     }
     
-    int getListTheme () throws WidgetsManagerException {
+    public int getListTheme () throws WidgetsManagerException {
       return provider.setListThemes (new LinkedHashMap<String, Integer> ()).get (prefs.getString (Const.PREF_LIST_THEME));
     }
     
     private int getColsNum (int size) {
-      return Int.floor (((size - 30) / 70));
+      return Int.floor ((size - 30) / 70);
     }
     
     private int getWidthColsNum () {
@@ -712,7 +688,7 @@
       return getColsNum (widgetInfo.minHeight);
     }
     
-    public void resizeWidget (AppWidgetManager appWidgetManager, int appWidgetId, Bundle widgetInfo) throws WidgetsManagerException {
+    public void resizeWidget (int appWidgetId, Bundle widgetInfo) throws WidgetsManagerException {
           
           /*prefItems.put (Const.PREF_WIDTH, widgetInfo.getInt (AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH));
           prefItems.put (Const.PREF_HEIGHT, widgetInfo.getInt (AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT));
@@ -720,7 +696,7 @@
           prefItems.put (Const.PREF_ACTION, "build");
           
           saveSettings ();
-          updateWidget (appWidgetManager, appWidgetId);
+          updateWidget (appWidgetId);
           
           prefItems.put (Const.PREF_ACTION, "update");
           
@@ -735,37 +711,78 @@
       intent.setAction (AppWidgetManager.ACTION_APPWIDGET_UPDATE);
       intent.putExtra (AppWidgetManager.EXTRA_APPWIDGET_ID, id);
       
-      new OS.Service (context)
-        .setIntent (PendingIntent.getBroadcast (context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT))
-        .init ()
+      new AlarmManager (context)
+        .setIntent (intent)
         .stop ();
       
     }
     
-    public AppWidgetManager appWidgetManager () {
-      return AppWidgetManager.getInstance (context);
-    }
-    
     public int[] getWidgetsIds () {
-      
-      ComponentName widgetComponent = new ComponentName (context, widgetProvider);
-      return appWidgetManager ().getAppWidgetIds (widgetComponent);
-      
+      return manager.getAppWidgetIds (new ComponentName (context, widgetProvider));
     }
     
-    public void onReceive (AppWidgetProvider provider, Intent intent) {
-      
-      String action = intent.getAction ();
-      
-      if (action.equals (AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
-        
-        int widgetId = intent.getIntExtra (AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
-        
-        if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID)
-          provider.onUpdate (context, appWidgetManager (), new int[] {widgetId});
-        
-      }
-      
+    public boolean onReceive (Intent intent, AppWidgetProvider provider) throws WidgetsManagerException {
+    	
+	    if (intent.getAction ().equals (AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
+	    	
+		    int widgetId = intent.getIntExtra (AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
+		    
+		    if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+					
+			    //loadPrefs (widgetId).updateWidget ();
+					
+			    provider.onUpdate (context, manager, new int[] {widgetId});
+			    
+			    return true;
+			    
+		    }
+		    
+	    }
+	    
+	    return false;
+	    
     }
     
+    public void onUpdate (int[] appWidgetIds) throws WidgetsManagerException {
+    	
+	    for (int id : appWidgetIds)
+	    	loadPrefs (id).updateWidget ();
+	    
+    }
+    
+	  public void onEnabled () throws WidgetsManagerException {
+		  onUpdate (getWidgetsIds ());
+	  }
+	  
+	  public void onAppWidgetOptionsChanged (int appWidgetId, Bundle bundle) throws WidgetsManagerException {
+     
+    	loadPrefs (appWidgetId);
+		  
+      /*RemoteViews remoteView = new RemoteViews (context.getPackageName (), manager.getListTheme ());
+      
+      if (bundle.getInt (AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT) < 110)
+        remoteView.setViewVisibility (R.id.text, View.GONE);
+      else
+        remoteView.setViewVisibility (R.id.text, View.VISIBLE);
+      
+      appWidgetManager.updateAppWidget (appWidgetId, manager.buildWidget (remoteView, appWidgetManager));*/
+		  
+		  resizeWidget (appWidgetId, bundle);
+		  
+	  }
+	  
+	  public void onDeleted (int[] appWidgetIds) throws WidgetsManagerException {
+    
+		  for (int id : appWidgetIds)
+			  onDeleted (id);
+		  
+	  }
+	  
+	  public void startWidgetUpdate (Intent intent) throws WidgetsManagerException {
+    
+		  for (int id : getWidgetsIds ())
+		  	loadPrefs (id).startWidgetUpdate ();
+		  
+	  }
+	  
   }

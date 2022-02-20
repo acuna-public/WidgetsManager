@@ -2,24 +2,24 @@
 
   android {
     
-    compileSdkVersion 28
+    compileSdkVersion 29
     
     defaultConfig {
       
       minSdkVersion 16
-      versionName project.property ('libraryVersion')
-      
-    }
-    
+	
+		}
+  
   }
   
-  apply from: 'https://raw.githubusercontent.com/acuna-public/MavenUpload/master/bintray.gradle'
-  apply from: 'https://raw.githubusercontent.com/acuna-public/MavenUpload/master/publish.gradle'
+  //apply from: 'https://raw.githubusercontent.com/acuna-public/MavenUpload/master/bintray.gradle'
+  //apply from: 'https://raw.githubusercontent.com/acuna-public/MavenUpload/master/publish.gradle'
   
   dependencies {
     
     implementation fileTree (include: ['*.jar'], dir: 'libs')
 		
-    api 'pro.acuna:androdesign:+'
+    //api 'ru.ointeractive:androdesign:+'
+    api project (':androdesign')
     
   }
