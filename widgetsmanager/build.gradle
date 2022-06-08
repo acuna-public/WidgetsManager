@@ -7,10 +7,22 @@
     defaultConfig {
       
       minSdkVersion 16
-	
+			
 		}
-  
-  }
+		
+		buildTypes {
+			
+			debug {
+			
+			}
+		
+			release {
+				consumerProguardFiles 'proguard-rules.pro'
+			}
+			
+		}
+		
+	}
   
   //apply from: 'https://raw.githubusercontent.com/acuna-public/MavenUpload/master/bintray.gradle'
   //apply from: 'https://raw.githubusercontent.com/acuna-public/MavenUpload/master/publish.gradle'

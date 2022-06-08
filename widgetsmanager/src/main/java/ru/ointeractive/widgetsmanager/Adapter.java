@@ -31,12 +31,25 @@
 	  
 		public abstract Adapter getInstance (WidgetsManager manager) throws WidgetsManagerException;
 		public abstract List<ListProvider.ListItem> getItems () throws WidgetsManagerException;
-		public abstract WidgetsManager.Layouts getLayouts ();
-		public abstract Map<String, Object> setProviderItems (Map<String, Object> data) throws WidgetsManagerException;
+		
+		public WidgetsManager.Layouts getLayouts () {
+			return null;
+		}
+		
+		public Map<String, Object> setProviderItems (Map<String, Object> data) throws WidgetsManagerException {
+			return data;
+		}
+		
 		public abstract Map<String, Integer> setThemes (Map<String, Integer> themes) throws WidgetsManagerException;
 		public abstract Map<String, Integer> setListThemes (Map<String, Integer> themes) throws WidgetsManagerException;
-		public abstract void onProviderSelect (View view, String provider, int widgetId) throws WidgetsManagerException;
-		public abstract ItemsAdapter setPrefsAdapter (ItemsAdapter.Layouts layouts, List<ListItem> items) throws WidgetsManagerException;
+		
+		public void onProviderSelect (View view, String provider, int widgetId) throws WidgetsManagerException {
+		
+		}
+		
+		public ItemsAdapter setPrefsAdapter (ItemsAdapter.Layouts layouts, List<ListItem> items) throws WidgetsManagerException {
+			return null;
+		}
 		
     public Map<String, Object> getDefPrefs (Map<String, Object> prefs) throws WidgetsManagerException {
       return prefs;
@@ -83,14 +96,14 @@
     }
     
     public Intent onItemClick () throws WidgetsManagerException {
-      return null;
+      return new Intent ();
     }
 		
 		public void setService (Intent intent) {
 			
 			new AlarmManager (context)
-				.setIntent (intent)
-				.start (new Time ().startDayTime (), android.app.AlarmManager.INTERVAL_DAY);
+				.setIntent (intent, 1)
+				.start (new Time ().startDayTime ()); // TODO day
 			
 		}
 		

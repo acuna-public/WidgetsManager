@@ -6,6 +6,7 @@
 	import android.appwidget.AppWidgetManager;
 	import android.content.Intent;
 	import android.graphics.Bitmap;
+	import android.os.AsyncTask;
 	import android.text.SpannableString;
 	import android.view.View;
 	import android.widget.RemoteViews;
@@ -16,6 +17,7 @@
 	import ru.ointeractive.andromeda.Strings;
 	import ru.ointeractive.andromeda.System;
 	import upl.core.Int;
+	import upl.core.Log;
 	
 	public class ListProvider implements RemoteViewsService.RemoteViewsFactory {
 		
@@ -26,10 +28,10 @@
       
 		}
 		
-		private WidgetsManager manager;
-		private List<ListProvider.ListItem> items;
+		protected final WidgetsManager manager;
+		protected final List<ListProvider.ListItem> items;
     
-    ListProvider (WidgetsManager manager) throws WidgetsManagerException {
+    public ListProvider (WidgetsManager manager) throws WidgetsManagerException {
 			
 			this.manager = manager;
 			items = manager.provider.getItems ();
@@ -54,19 +56,12 @@
 			intent.putExtra (AppWidgetManager.EXTRA_APPWIDGET_ID, manager.widgetId);
 			intent.putExtra ("position", position);
 			
-			RemoteViews remoteView = null;
-			
 			ListItem item = items.get (position);
       WidgetsManager.Layouts layouts = manager.provider.getLayouts ();
       
 			try {
 				
-				remoteView = new RemoteViews (manager.context.getPackageName (), manager.getListTheme ());
-				
-				remoteView = manager.provider.setListRemoteView (remoteView, intent);
-				
-				if (item.image != null && layouts.image > 0)
-					remoteView.setImageViewBitmap (layouts.image, item.image);
+				final RemoteViews remoteView = manager.provider.setListRemoteView (new RemoteViews (manager.context.getPackageName (), manager.getListTheme ()), intent);
 				
 				SpannableString text;
 				
@@ -134,11 +129,11 @@
 					
 				} else remoteView.setViewVisibility (R.id.text, View.GONE);
 				
+				return remoteView;
+				
 			} catch (WidgetsManagerException e) {
-				remoteView.setTextViewText (layouts.text, System.error (manager.context, e, manager.widgetId));
+				return null;
 			}
-			
-			return remoteView;
 			
 		}
 		
